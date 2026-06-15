@@ -6,7 +6,7 @@ var DBHandler = class extends PocketBase {
     super(url);
   }
   async initAuth(email, pass) {
-    this.collection("_superusers").authWithPassword(email, pass);
+    await this.collection("_superusers").authWithPassword(email, pass);
   }
   async getAll(collection) {
     if (!collection)
