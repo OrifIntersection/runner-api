@@ -10,7 +10,6 @@ There are two runners — **dev** and **prod** — each with their own build out
 scripts/           # Node scripts executed as steps in the deployment pipeline
   generate-host.js   # Allocates a subdomain + port for a project being deployed
   delete-host.js     # Tears down a deployed project
-  PASSWORD.js        # Manual password shim (see note below)
 
 script_modules/    # Shared logic for scripts
   DBHandler.js       # PocketBase client wrapper + shell operations
@@ -46,10 +45,10 @@ Outputs dev and prod bundles to `build/dev/` and `build/prod/`, each containing 
 
 ## Password setup
 
-GitHub Actions secrets require a paid plan for private repos. As a workaround, the PocketBase superuser password is set directly in `scripts/PASSWORD.js` on the server after deploying:
+GitHub Actions secrets require a paid plan for private repos. As a workaround, the PocketBase superuser password is read from a `.env` file on the server via [dotenv](https://github.com/motdotla/dotenv). Create `/root/scripts/.env` on the server:
 
-```js
-// scripts/PASSWORD.js
-const password = "your-password-here";
-export default password;
 ```
+PASSWORD=your-password-here
+```
+
+This file lives outside the repo and is never committed.
