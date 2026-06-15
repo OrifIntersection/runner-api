@@ -1,0 +1,20 @@
+{
+	"name": "runner-api",
+	"version": "1.0.0",
+	"description": "",
+	"license": "ISC",
+	"author": "",
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"build": "node build.js",
+		"serve": "echo 'No dev server for this project'",
+		"dev": "echo 'No dev server for this project'"
+	},
+	"dependencies": {
+		"pocketbase": "^0.27.0"
+	},
+	"devDependencies": {
+		"esbuild": "^0.28.1"
+	}
+}
