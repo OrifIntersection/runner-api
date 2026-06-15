@@ -12,6 +12,7 @@
 		"dev": "echo 'No dev server for this project'"
 	},
 	"dependencies": {
+		"dotenv": "^17.4.2",
 		"pocketbase": "^0.27.0"
 	},
 	"devDependencies": {

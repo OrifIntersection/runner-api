@@ -47,10 +47,12 @@ var DBHandler = class extends PocketBase {
 };
 
 // scripts/delete-host.js
-import PASSWORD from "./PASSWORD.js";
+import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config({ path: "/root/scripts/.env" });
 var repo = process.argv[2];
 var db = new DBHandler("http://127.0.0.1:8090");
-await db.initAuth("ljhaesler@protonmail.com", PASSWORD);
+await db.initAuth("ljhaesler@protonmail.com", process.env.PASSWORD);
 var existingHost = await db.getOne("hosts", `repo="${repo}"`);
 if (!existingHost) throw new Error(`Repo name ${repo} was not found!`);
 await db.deleteHostMetadata(existingHost);

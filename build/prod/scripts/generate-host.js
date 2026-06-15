@@ -103,9 +103,11 @@ var DBHandler = class extends PocketBase {
 };
 
 // scripts/generate-host.js
-import PASSWORD from "./PASSWORD.js";
+import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config({ path: "/root/scripts/.env" });
 var db = new DBHandler("http://127.0.0.1:8090");
-await db.initAuth("ljhaesler@protonmail.com", PASSWORD);
+await db.initAuth("ljhaesler@protonmail.com", process.env.PASSWORD);
 var repo = process.argv[2];
 var hostsList = await db.getAll("hosts");
 var existingHost = await db.getOne("hosts", `repo="${repo}"`);

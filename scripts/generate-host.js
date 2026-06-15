@@ -9,10 +9,12 @@ import {
 	generateApacheDirective,
 } from "../script_modules/hostHandler.js";
 import DBHandler from "../script_modules/DBHandler.js";
-import PASSWORD from "./PASSWORD.js";
+import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config({ path: "/root/scripts/.env" });
 
 const db = new DBHandler("http://127.0.0.1:8090");
-await db.initAuth("ljhaesler@protonmail.com", PASSWORD);
+await db.initAuth("ljhaesler@protonmail.com", process.env.PASSWORD);
 
 const repo = process.argv[2];
 

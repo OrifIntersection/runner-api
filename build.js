@@ -8,12 +8,7 @@ const defines = {
 const builds = [
 	// Scripts
 	{
-		entryPoints: [
-			"scripts/delete-host.js",
-			"scripts/generate-host.js",
-			"scripts/PASSWORD.js",
-		],
-		external: ["./PASSWORD.js"],
+		entryPoints: ["scripts/delete-host.js", "scripts/generate-host.js"],
 		format: "esm",
 		bundle: true,
 		packages: "external",
@@ -21,12 +16,7 @@ const builds = [
 		define: defines.dev,
 	},
 	{
-		entryPoints: [
-			"scripts/delete-host.js",
-			"scripts/generate-host.js",
-			"scripts/PASSWORD.js",
-		],
-		external: ["./PASSWORD.js"],
+		entryPoints: ["scripts/delete-host.js", "scripts/generate-host.js"],
 		format: "esm",
 		bundle: true,
 		packages: "external",
