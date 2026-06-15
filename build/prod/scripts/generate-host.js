@@ -74,8 +74,8 @@ var DBHandler = class extends PocketBase {
       throw new Error("A collection must be specified for getOne");
     if (!filter) throw new Error("A filter must be specified for getOne");
     const list = await this.collection(collection).getList(1, 1, { filter });
-    if (list.length === 0) return null;
-    else return list[0];
+    if (list.items.length === 0) return null;
+    else return list.items[0];
   }
   async postOne(collection, data) {
     if (!collection)
