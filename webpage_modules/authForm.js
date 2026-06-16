@@ -28,7 +28,7 @@ export function authForm() {
 		const password = document.getElementById("password").value;
 
 		const response = await fetch(
-			`https://${WEB_URL}/api/collections/_superusers/auth-with-password`,
+			`${PROTOCOL}://${WEB_URL}/api/collections/_superusers/auth-with-password`,
 			{
 				method: "POST",
 				headers: { "Content-Type": "application/json" },

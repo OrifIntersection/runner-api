@@ -1,8 +1,8 @@
 import * as esbuild from "esbuild";
 
 const defines = {
-	dev: { WEB_URL: '"is-dev.applications.ws"' },
-	prod: { WEB_URL: '"is-prod.applications.ws"' }, // update as needed
+	dev: { WEB_URL: '"is-dev.applications.ws"', PROTOCOL: "https" },
+	prod: { WEB_URL: '"is-prod.applications.ws"', PROTOCOL: "https" }, // update as needed
 };
 
 const builds = [

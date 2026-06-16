@@ -23,7 +23,7 @@ export function listHosts(hosts) {
 		div.className = "host-card";
 
 		const weburl = document.createElement("a");
-		weburl.href = `https://${host.name}.${WEB_URL}`;
+		weburl.href = `${PROTOCOL}://${host.name}.${WEB_URL}`;
 		weburl.textContent = `${host.name}.${WEB_URL}`;
 
 		const giturl = document.createElement("a");
