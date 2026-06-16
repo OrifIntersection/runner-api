@@ -12,7 +12,8 @@ function generateApacheDirective(name, port, repo2) {
 	    ProxyPass / http://127.0.0.1:${port}/
 	    ProxyPassReverse / http://127.0.0.1:${port}/
     </VirtualHost>`;
-  fs.writeFileSync(`/etc/apache2/sites-available/${repo2}.conf`, directive);
+  if (process.env.ENVIRONMENT === "dev") console.log(directive);
+  else fs.writeFileSync(`/etc/apache2/sites-available/${repo2}.conf`, directive);
 }
 function generateName(animals2, adjectives2, usedNames2) {
   let exists = true;
@@ -103,12 +104,26 @@ var DBHandler = class extends PocketBase {
 };
 
 // scripts/generate-host.js
-import "dotenv/config";
 import dotenv from "dotenv";
-dotenv.config({ path: "/root/scripts/.env" });
-var db = new DBHandler("http://127.0.0.1:8090");
-await db.initAuth("ljhaesler@protonmail.com", process.env.PASSWORD);
+var result = dotenv.config({ path: "/root/scripts/.env" });
+if (result.error) result = dotenv.config({ path: "./scripts/.env" });
+if (result.error) throw new Error("No .env file found.");
+if (!process.env.PASSWORD)
+  throw new Error("No PASSWORD set for pocketbase in .env");
 var repo = process.argv[2];
+if (!repo)
+  throw new Error(
+    "A repo name must be provided to the script in order to generate a host."
+  );
+var db = new DBHandler("http://127.0.0.1:8090");
+try {
+  await db.health.check();
+} catch (err) {
+  throw new Error(
+    "No connection to PocketBase on localhost:8090, are you running an instance of PocketBase locally?"
+  );
+}
+await db.initAuth("ljhaesler@protonmail.com", process.env.PASSWORD);
 var hostsList = await db.getAll("hosts");
 var existingHost = await db.getOne("hosts", `repo="${repo}"`);
 var animalsList = await db.collection("animals").getFullList();

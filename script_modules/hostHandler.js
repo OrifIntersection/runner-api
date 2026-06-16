@@ -9,8 +9,8 @@ export function generateApacheDirective(name, port, repo) {
 	    ProxyPass / http://127.0.0.1:${port}/
 	    ProxyPassReverse / http://127.0.0.1:${port}/
     </VirtualHost>`;
-
-	fs.writeFileSync(`/etc/apache2/sites-available/${repo}.conf`, directive);
+	if (process.env.ENVIRONMENT === "dev") console.log(directive);
+	else fs.writeFileSync(`/etc/apache2/sites-available/${repo}.conf`, directive);
 }
 
 export function generateName(animals, adjectives, usedNames) {
