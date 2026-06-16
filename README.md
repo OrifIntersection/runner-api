@@ -31,7 +31,7 @@ The `scripts` field in `package.json` defines:
 | Script | What it does |
 | --- | --- |
 | `npm run build` | Runs `build.js` (esbuild) and writes the dev/prod bundles to `build/`. |
-| `npm run serve` | Bundles `webpage/index.js` with `WEB_URL` pointed at `127.0.0.1:8090` and serves `webpage/` so you can view the admin UI against a local PocketBase instance. |
+| `npm run serve` | Bundles `webpage/index.js` with `WEB_URL` pointed at `127.0.0.1:8090` and `PROTOCOL` set to `http`, then serves `webpage/` so you can view the admin UI against a local PocketBase instance. |
 | `npm run generate-host -- <repo>` | Bundles `scripts/generate-host.js` with esbuild and pipes the result into `node --input-type=module -`, then runs it against a local PocketBase instance. |
 | `npm run delete-host -- <repo>` | Same, but for `scripts/delete-host.js`. |
 
@@ -57,7 +57,11 @@ npm install
 npm run build
 ```
 
-Outputs dev and prod bundles to `build/dev/` and `build/prod/`, each containing `scripts/` and `pb/pb_public/`. The `WEB_URL` constant is injected at build time.
+Outputs dev and prod bundles to `build/dev/` and `build/prod/`, each containing `scripts/` and `pb/pb_public/`. Two constants are injected at build time:
+- `WEB_URL` — `is-dev.applications.ws` or `is-prod.applications.ws`.
+- `PROTOCOL` — `https` for both dev and prod builds.
+
+The webpage connects to PocketBase at `${PROTOCOL}://${WEB_URL}` with no runtime fallback — `npm run serve` overrides `PROTOCOL` to `http` so the same code works against a local, non-TLS PocketBase instance.
 
 ## Local development
 
