@@ -16,6 +16,7 @@ if (result.error) result = dotenv.config({ path: "./scripts/.env" });
 if (result.error) throw new Error("No .env file found.");
 if (!process.env.PASSWORD)
 	throw new Error("No PASSWORD set for pocketbase in .env");
+if (!process.env.EMAIL) throw new Error("No EMAIL set for pocketbase in .env");
 
 const repo = process.argv[2];
 if (!repo)
@@ -32,7 +33,7 @@ try {
 	);
 }
 
-await db.initAuth("ljhaesler@protonmail.com", process.env.PASSWORD);
+await db.initAuth(process.env.EMAIL, process.env.PASSWORD);
 
 const hostsList = await db.getAll("hosts");
 // returns null if there is no existingHost
@@ -75,4 +76,5 @@ try {
 	}
 } catch (err) {
 	console.error(err);
+	process.exit(1);
 }

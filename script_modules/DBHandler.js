@@ -37,7 +37,7 @@ export default class DBHandler extends PocketBase {
 	}
 
 	async deleteOne(collection, id) {
-		this.collection(collection).delete(id);
+		await this.collection(collection).delete(id);
 	}
 
 	async deleteHostMetadata(host) {
@@ -55,7 +55,7 @@ export default class DBHandler extends PocketBase {
 		execSync(`docker stop ${host.name}-container`);
 		execSync(`docker rm ${host.name}-container`);
 		execSync(`docker rmi ${host.name}-image`);
-		execSync(`certbot delete --cert-name ${host.name}.is-dev.applications.ws`, {
+		execSync(`certbot delete --cert-name ${host.name}.${WEB_URL}`, {
 			stdio: ["pipe", "inherit", "inherit"],
 			input: "y\n",
 		});

@@ -26,9 +26,25 @@ build.js           # esbuild config
 
 ## Scripts
 
+The `scripts` field in `package.json` defines:
+
+| Script | What it does |
+| --- | --- |
+| `npm run build` | Runs `build.js` (esbuild) and writes the dev/prod bundles to `build/`. |
+| `npm run serve` | Bundles `webpage/index.js` with `WEB_URL` pointed at `127.0.0.1:8090` and serves `webpage/` so you can view the admin UI against a local PocketBase instance. |
+| `npm run generate-host -- <repo>` | Bundles `scripts/generate-host.js` with esbuild and pipes the result into `node --input-type=module -`, then runs it against a local PocketBase instance. |
+| `npm run delete-host -- <repo>` | Same, but for `scripts/delete-host.js`. |
+
 **`generate-host.js <repo>`** — Called during deployment. Checks PocketBase for an existing entry for the repo; if none exists, generates a unique `adjective+animal` subdomain, finds a free port, writes an Apache virtual host config, and stores the record. Outputs `domain-name`, `port`, and `cert` to `$GITHUB_OUTPUT`.
 
 **`delete-host.js <repo>`** — Tears down a deployment: disables Apache site, removes the SSL certificate, stops/removes the Docker container and image, and deletes the PocketBase record.
+
+Both scripts read the repo name from `process.argv[2]`, not stdin. The `-` in `node --input-type=module -` is only there because esbuild's bundled *code* is piped into Node that way — the repo name itself is a normal trailing CLI argument, passed through npm's `--` separator:
+
+```bash
+npm run generate-host -- my-repo-name
+npm run delete-host -- my-repo-name
+```
 
 ## Admin UI
 
@@ -43,12 +59,31 @@ npm run build
 
 Outputs dev and prod bundles to `build/dev/` and `build/prod/`, each containing `scripts/` and `pb/pb_public/`. The `WEB_URL` constant is injected at build time.
 
-## Password setup
+## Local development
 
-GitHub Actions secrets require a paid plan for private repos. As a workaround, the PocketBase superuser password is read from a `.env` file on the server via [dotenv](https://github.com/motdotla/dotenv). Create `/root/scripts/.env` on the server:
+The scripts and webpage can be run against a local PocketBase instance for testing, without needing a real Apache/Docker/certbot host.
+
+**You must install and run PocketBase yourself** — it is not bundled or managed by this repo. Download it from [pocketbase.io](https://pocketbase.io/) and start it so it's listening on `127.0.0.1:8090`. You'll also need to:
+- Create a superuser account (via the PocketBase admin UI at `http://127.0.0.1:8090/_/`) — `generate-host.js` and `delete-host.js` authenticate as this superuser.
+- Create the `hosts`, `animals`, and `adjectives` collections that the scripts read from and write to.
+- Allow public List/View API access on the `hosts` collection, since the admin webpage queries it without authenticating.
+
+`ENVIRONMENT=dev` (set via `scripts/.env`, see below) skips steps that only make sense on the real server: `delete-host.js` will skip removing the Apache site/SSL cert/Docker container, and `generateApacheDirective` will log the virtual host config to the console instead of writing it to `/etc/apache2/sites-available/`.
+
+```bash
+npm run generate-host -- <repo>
+npm run delete-host -- <repo>
+npm run serve   # serves the admin webpage against the local PocketBase instance
+```
+
+### `.env` setup
+
+`generate-host.js` and `delete-host.js` need a PocketBase superuser email and password, plus `ENVIRONMENT=dev` for local testing. They look for `/root/scripts/.env` first (the production server path), falling back to `./scripts/.env` for local development. Create `scripts/.env`:
 
 ```
-PASSWORD=your-password-here
+EMAIL=your-superuser-email
+PASSWORD=your-superuser-password
+ENVIRONMENT=dev
 ```
 
-This file lives outside the repo and is never committed.
+This file is gitignored and never committed.

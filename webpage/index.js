@@ -2,7 +2,9 @@ import PocketBase from "pocketbase";
 import { listHosts } from "../webpage_modules/listHosts";
 import { authForm } from "../webpage_modules/authForm";
 
-let pb = new PocketBase(`https://${WEB_URL}`);
+let protocol = "https://";
+
+let pb = new PocketBase(`${protocol}${WEB_URL}`);
 try {
 	await pb.health.check();
 } catch (err) {
@@ -13,7 +15,8 @@ try {
 	console.log(
 		"This involves allowing non-superuser access to HTTP/GET the host collection.",
 	);
-	pb = new PocketBase(`http://${WEB_URL}`);
+	let protocol = "http://";
+	pb = new PocketBase(`${protocol}${WEB_URL}`);
 }
 
 const hosts = await pb.collection("hosts").getFullList({
