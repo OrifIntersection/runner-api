@@ -28,7 +28,7 @@ var DBHandler = class extends PocketBase {
     await this.collection(collection).create(data);
   }
   async deleteOne(collection, id) {
-    this.collection(collection).delete(id);
+    await this.collection(collection).delete(id);
   }
   async deleteHostMetadata(host) {
     execSync(`sudo a2dissite ${host.repo} ${host.repo}-le-ssl`);
@@ -38,7 +38,7 @@ var DBHandler = class extends PocketBase {
     execSync(`docker stop ${host.name}-container`);
     execSync(`docker rm ${host.name}-container`);
     execSync(`docker rmi ${host.name}-image`);
-    execSync(`certbot delete --cert-name ${host.name}.is-dev.applications.ws`, {
+    execSync(`certbot delete --cert-name ${host.name}.${"is-dev.applications.ws"}`, {
       stdio: ["pipe", "inherit", "inherit"],
       input: "y\n"
     });
@@ -53,6 +53,7 @@ if (result.error) result = dotenv.config({ path: "./scripts/.env" });
 if (result.error) throw new Error("No .env file found.");
 if (!process.env.PASSWORD)
   throw new Error("No PASSWORD set for pocketbase in .env");
+if (!process.env.EMAIL) throw new Error("No EMAIL set for pocketbase in .env");
 var repo = process.argv[2];
 if (!repo)
   throw new Error(
@@ -66,7 +67,7 @@ try {
     "No connection to PocketBase on localhost:8090, are you running an instance of PocketBase locally?"
   );
 }
-await db.initAuth("ljhaesler@protonmail.com", process.env.PASSWORD);
+await db.initAuth(process.env.EMAIL, process.env.PASSWORD);
 var existingHost = await db.getOne("hosts", `repo="${repo}"`);
 if (!existingHost) throw new Error(`Repo name ${repo} was not found!`);
 if (process.env.ENVIRONMENT === "dev") {
@@ -76,5 +77,5 @@ if (process.env.ENVIRONMENT === "dev") {
 } else {
   await db.deleteHostMetadata(existingHost);
 }
-await db.deleteOne("host", existingHost.id);
+await db.deleteOne("hosts", existingHost.id);
 process.exit(0);
