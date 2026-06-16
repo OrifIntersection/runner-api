@@ -8,7 +8,7 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "node build.js",
-		"serve": "esbuild webpage/index.js --bundle --define:WEB_URL='\"127.0.0.1:8090\"' --define:PROTOCOL='http' --outfile=webpage/index.js --format=esm --serve --servedir=webpage",
+		"serve": "esbuild webpage/index.js --bundle --define:WEB_URL='\"127.0.0.1:8090\"' --define:PROTOCOL='\"http\"' --outfile=webpage/index.js --format=esm --serve --servedir=webpage",
 		"delete-host": "esbuild scripts/delete-host.js --bundle --define:WEB_URL='\"127.0.0.1:8090\"' --format=esm --platform=node --packages=external | node --input-type=module -",
 		"generate-host": "esbuild scripts/generate-host.js --bundle --define:WEB_URL='\"127.0.0.1:8090\"' --format=esm --platform=node --packages=external | node --input-type=module -"
 	},
