@@ -1,6 +1,6 @@
 import PocketBase from "pocketbase";
-import { listHosts } from "../webpage_modules/listHosts";
-import { authForm } from "../webpage_modules/authForm";
+import { listHosts } from "./modules/listHosts";
+import { authForm } from "./modules/authForm";
 
 let pb = new PocketBase(`${PROTOCOL}://${WEB_URL}`);
 

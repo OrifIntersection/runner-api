@@ -7,8 +7,8 @@ import {
 	generatePort,
 	generateName,
 	generateApacheDirective,
-} from "../script_modules/hostHandler.js";
-import DBHandler from "../script_modules/DBHandler.js";
+} from "./modules/hostHandler.js";
+import DBHandler from "./modules/DBHandler.js";
 
 import dotenv from "dotenv";
 let result = dotenv.config({ path: "/root/scripts/.env" });

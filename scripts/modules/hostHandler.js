@@ -32,6 +32,13 @@ export function generateName(animals, adjectives, usedNames) {
 }
 
 export function generatePort() {
+	// ss (Linux-only) isn't available on a typical dev machine, and locally
+	// there's nothing real bound to any port to check against anyway — the
+	// goal in dev is just exercising the generate-host.js/PocketBase flow.
+	if (process.env.ENVIRONMENT === "dev") {
+		return 1024 + Math.floor(Math.random() * (65535 - 1024 + 1));
+	}
+
 	try {
 		const usedPorts = getUsedPorts();
 

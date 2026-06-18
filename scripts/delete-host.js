@@ -1,4 +1,4 @@
-import DBHandler from "../script_modules/DBHandler.js";
+import DBHandler from "./modules/DBHandler.js";
 import dotenv from "dotenv";
 let result = dotenv.config({ path: "/root/scripts/.env" });
 if (result.error) result = dotenv.config({ path: "./scripts/.env" });
