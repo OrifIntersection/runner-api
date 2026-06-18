@@ -16,28 +16,30 @@ const webEntryPoints = [
 ];
 const webLoader = { ".html": "copy", ".css": "copy" };
 const scriptEntryPoints = [
-	"scripts/delete-host.js",
-	"scripts/generate-host.js",
+	"scripts/delete-host.cjs",
+	"scripts/generate-host.cjs",
 ];
 
 async function buildRemote() {
 	const builds = [
 		{
 			entryPoints: scriptEntryPoints,
-			format: "esm",
+			format: "cjs",
 			bundle: true,
 			minify: true,
 			platform: "node",
 			outdir: "build/dev/scripts",
+			outExtension: { ".js": ".cjs" },
 			define: defines.dev,
 		},
 		{
 			entryPoints: scriptEntryPoints,
-			format: "esm",
+			format: "cjs",
 			bundle: true,
 			minify: true,
 			platform: "node",
 			outdir: "build/prod/scripts",
+			outExtension: { ".js": ".cjs" },
 			define: defines.prod,
 		},
 		{
@@ -79,14 +81,14 @@ async function buildPbPublic() {
 async function runNodeScript(entryPoint) {
 	const result = await esbuild.build({
 		entryPoints: [entryPoint],
-		format: "esm",
+		format: "cjs",
 		bundle: true,
 		platform: "node",
 		packages: "external",
 		define: { WEB_URL: defines.local.WEB_URL },
 		write: false,
 	});
-	const nodeProc = spawn("node", ["--input-type=module", "-", repo], {
+	const nodeProc = spawn("node", ["--input-type=commonjs", "-", repo], {
 		stdio: ["pipe", "inherit", "inherit"],
 	});
 	nodeProc.stdin.write(result.outputFiles[0].text);
@@ -102,10 +104,10 @@ switch (target) {
 		await buildPbPublic();
 		break;
 	case "generate-host":
-		await runNodeScript("scripts/generate-host.js");
+		await runNodeScript("scripts/generate-host.cjs");
 		break;
 	case "delete-host":
-		await runNodeScript("scripts/delete-host.js");
+		await runNodeScript("scripts/delete-host.cjs");
 		break;
 	default:
 		console.error(

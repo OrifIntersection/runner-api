@@ -1,7 +1,7 @@
-import { execSync } from "child_process";
-import fs from "fs";
+const { execSync } = require("child_process");
+const fs = require("fs");
 
-export function generateApacheDirective(name, port, repo) {
+function generateApacheDirective(name, port, repo) {
 	const directive = `<VirtualHost *:80>
 	    ServerName ${name}.${WEB_URL}
 
@@ -13,7 +13,7 @@ export function generateApacheDirective(name, port, repo) {
 	else fs.writeFileSync(`/etc/apache2/sites-available/${repo}.conf`, directive);
 }
 
-export function generateName(animals, adjectives, usedNames) {
+function generateName(animals, adjectives, usedNames) {
 	let exists = true;
 	let name;
 	while (exists) {
@@ -31,7 +31,7 @@ export function generateName(animals, adjectives, usedNames) {
 	return name;
 }
 
-export function generatePort() {
+function generatePort() {
 	// ss (Linux-only) isn't available on a typical dev machine, and locally
 	// there's nothing real bound to any port to check against anyway — the
 	// goal in dev is just exercising the generate-host.js/PocketBase flow.
@@ -71,3 +71,5 @@ function getUsedPorts() {
 		throw new Error(err);
 	}
 }
+
+module.exports = { generateApacheDirective, generateName, generatePort };

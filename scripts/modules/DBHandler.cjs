@@ -1,7 +1,8 @@
-import PocketBase from "pocketbase";
-import { execSync } from "child_process";
+const PocketBaseModule = require("pocketbase");
+const PocketBase = PocketBaseModule.default || PocketBaseModule;
+const { execSync } = require("child_process");
 
-export default class DBHandler extends PocketBase {
+class DBHandler extends PocketBase {
 	constructor(url) {
 		super(url);
 	}
@@ -62,3 +63,5 @@ export default class DBHandler extends PocketBase {
 		execSync("apache2ctl restart");
 	}
 }
+
+module.exports = DBHandler;
