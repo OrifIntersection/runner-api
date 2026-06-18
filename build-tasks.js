@@ -29,7 +29,6 @@ async function buildRemote() {
 			minify: true,
 			platform: "node",
 			outdir: "build/dev/scripts",
-			outExtension: { ".js": ".cjs" },
 			define: defines.dev,
 		},
 		{
@@ -39,7 +38,6 @@ async function buildRemote() {
 			minify: true,
 			platform: "node",
 			outdir: "build/prod/scripts",
-			outExtension: { ".js": ".cjs" },
 			define: defines.prod,
 		},
 		{
