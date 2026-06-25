@@ -12,6 +12,7 @@ RUN apk add --no-cache ca-certificates curl unzip \
 WORKDIR /pb
 
 COPY pb_migrations ./pb_migrations
+COPY pb_hooks ./pb_hooks
 COPY entrypoint.sh ./entrypoint.sh
 COPY pb_public ./pb_public
 RUN chmod +x ./entrypoint.sh

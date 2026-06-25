@@ -19,6 +19,12 @@ migrate(
 		});
 
 		app.save(collection);
+
+		const record = new Record(collection);
+		record.set("name", "test-URL");
+		record.set("port", "1234");
+		record.set("repo", "test-repo");
+		app.save(record);
 	},
 	(app) => {
 		const collection = app.findCollectionByNameOrId("hosts");

@@ -20,5 +20,5 @@ const hosts = await pb.collection("hosts").getFullList({
 	sort: "-created",
 });
 
-listHosts(hosts);
-authForm();
+listHosts(hosts, pb);
+authForm(pb);

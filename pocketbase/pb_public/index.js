@@ -1006,7 +1006,7 @@ var Client = class {
 };
 
 // webpage/modules/listHosts.js
-function listHosts(hosts2) {
+function listHosts(hosts2, pb2) {
   const gitdomain = "https://github.com/OrifIntersection/";
   const container = document.createElement("div");
   container.className = "host-list";
@@ -1019,73 +1019,104 @@ function listHosts(hosts2) {
   <span><span class="port-label">Port</span></span>
   <span>GitHub Repo</span>
   <span><span class="cert-label">Cert Date</span></span>
+  <span></span>
 `;
   container.appendChild(headerDiv);
+  const deleteButtons = [];
   for (const host of hosts2) {
     const div = document.createElement("div");
     div.className = "host-card";
     const weburl = document.createElement("a");
     weburl.href = `${"http"}://${host.name}.${"127.0.0.1:8090"}`;
     weburl.textContent = `${host.name}.${"127.0.0.1:8090"}`;
-    const giturl = document.createElement("a");
-    giturl.href = `${gitdomain}${host.repo}`;
-    giturl.textContent = host.repo;
     const portSpan = document.createElement("span");
     portSpan.className = "data-value";
     portSpan.textContent = host.port;
+    const giturl = document.createElement("a");
+    giturl.href = `${gitdomain}${host.repo}`;
+    giturl.textContent = host.repo;
     const certDateSpan = document.createElement("span");
     certDateSpan.className = "data-value";
     certDateSpan.textContent = host.certDate;
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-btn";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.style.display = "none";
+    deleteBtn.addEventListener("click", async () => {
+      if (!confirm(`Delete host "${host.name}" for repo "${host.repo}"?`)) return;
+      try {
+        await pb2.collection("hosts").delete(host.id);
+        div.remove();
+      } catch (err) {
+        if (err.status === 401 || err.status === 403) {
+          pb2.authStore.clear();
+        }
+        console.error("Delete failed:", err.message);
+      }
+    });
+    deleteButtons.push(deleteBtn);
     div.appendChild(weburl);
     div.appendChild(portSpan);
     div.appendChild(giturl);
     div.appendChild(certDateSpan);
+    div.appendChild(deleteBtn);
     container.appendChild(div);
   }
   document.body.appendChild(container);
+  function updateButtons() {
+    const visible = pb2.authStore.isValid;
+    for (const btn of deleteButtons) {
+      btn.style.display = visible ? "" : "none";
+    }
+  }
+  pb2.authStore.onChange(updateButtons);
+  updateButtons();
 }
 
 // webpage/modules/authForm.js
-function authForm() {
+function authForm(pb2) {
   const form = document.createElement("form");
   form.setAttribute("id", "loginForm");
   const emailInput = document.createElement("input");
   emailInput.setAttribute("type", "email");
-  emailInput.setAttribute("id", "email");
   emailInput.setAttribute("placeholder", "Email");
   emailInput.setAttribute("required", true);
   const passInput = document.createElement("input");
   passInput.setAttribute("type", "password");
-  passInput.setAttribute("id", "password");
   passInput.setAttribute("placeholder", "Password");
   passInput.setAttribute("required", true);
   const submitButton = document.createElement("button");
   submitButton.setAttribute("type", "submit");
   submitButton.textContent = "Login";
+  const statusSpan = document.createElement("span");
+  statusSpan.className = "auth-status";
   form.appendChild(emailInput);
   form.appendChild(passInput);
   form.appendChild(submitButton);
+  form.appendChild(statusSpan);
+  function updateFormState() {
+    const isAuthed = pb2.authStore.isValid;
+    emailInput.style.display = isAuthed ? "none" : "";
+    passInput.style.display = isAuthed ? "none" : "";
+    submitButton.style.display = isAuthed ? "none" : "";
+    statusSpan.textContent = isAuthed ? `Logged in as ${pb2.authStore.record?.email}` : "";
+  }
   form.addEventListener("submit", async (e2) => {
     e2.preventDefault();
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const response = await fetch(
-      `${"http"}://${"127.0.0.1:8090"}/api/collections/_superusers/auth-with-password`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identity: email, password })
-      }
-    );
-    const data = await response.json();
-    if (response.ok) {
-      sessionStorage.setItem("pb_token", data.token);
-      console.log("Logged in as:", data.record);
-    } else {
-      console.error("Auth failed:", data.message);
+    try {
+      await pb2.collection("_superusers").authWithPassword(emailInput.value, passInput.value);
+    } catch (err) {
+      console.error("Auth failed:", err.message);
     }
   });
-  document.body.appendChild(form);
+  pb2.authStore.onChange(updateFormState);
+  updateFormState();
+  if (pb2.authStore.isValid) {
+    pb2.collection("_superusers").authRefresh().catch(() => {
+      pb2.authStore.clear();
+    });
+  }
+  document.body.prepend(form);
 }
 
 // webpage/index.js
@@ -1104,5 +1135,5 @@ try {
 var hosts = await pb.collection("hosts").getFullList({
   sort: "-created"
 });
-listHosts(hosts);
-authForm();
+listHosts(hosts, pb);
+authForm(pb);

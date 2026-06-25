@@ -1,7 +1,6 @@
 import * as esbuild from "esbuild";
-import { spawn } from "child_process";
 
-const [, , target, repo] = process.argv;
+const [, , target] = process.argv;
 
 export const defines = {
 	dev: { WEB_URL: '"is-dev.applications.ws"', PROTOCOL: '"https"' },
@@ -14,32 +13,12 @@ const webEntryPoints = [
 	"webpage/index.html",
 	"webpage/styles.css",
 ];
+
+const hookEntryPoint = ["hooks/main.pb.js"];
 const webLoader = { ".html": "copy", ".css": "copy" };
-const scriptEntryPoints = [
-	"scripts/delete-host.cjs",
-	"scripts/generate-host.cjs",
-];
 
 async function buildRemote() {
 	const builds = [
-		{
-			entryPoints: scriptEntryPoints,
-			format: "cjs",
-			bundle: true,
-			minify: true,
-			platform: "node",
-			outdir: "build/dev/scripts",
-			define: defines.dev,
-		},
-		{
-			entryPoints: scriptEntryPoints,
-			format: "cjs",
-			bundle: true,
-			minify: true,
-			platform: "node",
-			outdir: "build/prod/scripts",
-			define: defines.prod,
-		},
 		{
 			entryPoints: webEntryPoints,
 			format: "esm",
@@ -58,58 +37,61 @@ async function buildRemote() {
 			define: defines.prod,
 			loader: webLoader,
 		},
+		{
+			entryPoints: hookEntryPoint,
+			format: "esm",
+			bundle: true,
+			minify: true,
+			outdir: "build/dev/pb/pb_hooks",
+			define: defines.dev,
+			loader: webLoader,
+		},
+		{
+			entryPoints: hookEntryPoint,
+			format: "esm",
+			bundle: true,
+			minify: true,
+			outdir: "build/prod/pb/pb_hooks",
+			define: defines.prod,
+			loader: webLoader,
+		},
 	];
 	const results = await Promise.all(builds.map((b) => esbuild.build(b)));
 	console.log(`Built ${results.length} bundles.`);
 }
 
-async function buildPbPublic() {
-	const options = {
-		entryPoints: webEntryPoints,
-		format: "esm",
-		bundle: true,
-		outdir: "pocketbase/pb_public",
-		define: defines.local,
-		loader: webLoader,
-	};
-
-	esbuild.build(options);
-}
-
-async function runNodeScript(entryPoint) {
-	const result = await esbuild.build({
-		entryPoints: [entryPoint],
-		format: "cjs",
-		bundle: true,
-		platform: "node",
-		packages: "external",
-		define: { WEB_URL: defines.local.WEB_URL },
-		write: false,
-	});
-	const nodeProc = spawn("node", ["--input-type=commonjs", "-", repo], {
-		stdio: ["pipe", "inherit", "inherit"],
-	});
-	nodeProc.stdin.write(result.outputFiles[0].text);
-	nodeProc.stdin.end();
-	nodeProc.on("exit", (code) => process.exit(code ?? 0));
+async function buildLocal() {
+	const builds = [
+		{
+			entryPoints: webEntryPoints,
+			format: "esm",
+			bundle: true,
+			outdir: "pocketbase/pb_public",
+			define: defines.local,
+			loader: webLoader,
+		},
+		{
+			entryPoints: hookEntryPoint,
+			format: "esm",
+			bundle: true,
+			outdir: "pocketbase/pb_hooks",
+			define: defines.local,
+		},
+	];
+	const results = await Promise.all(builds.map((b) => esbuild.build(b)));
+	console.log(`Built ${results.length} bundles.`);
 }
 
 switch (target) {
-	case "remote":
+	case "build-remote":
 		await buildRemote();
 		break;
-	case "build-pb-public":
-		await buildPbPublic();
-		break;
-	case "generate-host":
-		await runNodeScript("scripts/generate-host.cjs");
-		break;
-	case "delete-host":
-		await runNodeScript("scripts/delete-host.cjs");
+	case "build-local":
+		await buildLocal();
 		break;
 	default:
 		console.error(
-			`Unknown target "${target}". Expected one of: remote, build-pb-public, generate-host, delete-host`,
+			`Unknown target "${target}". Expected one of: build-remote, build-local`,
 		);
 		process.exit(1);
 }

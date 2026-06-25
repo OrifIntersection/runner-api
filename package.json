@@ -7,15 +7,12 @@
 	"type": "module",
 	"main": "index.js",
 	"scripts": {
-		"build": "node build-tasks.js remote",
-		"generate-host": "node build-tasks.js generate-host",
-		"delete-host": "node build-tasks.js delete-host",
-		"start": "node build-tasks.js build-pb-public && npm run pb:build-image && npm run pb:start-container",
+		"build": "node build-tasks.js build-remote",
+		"start": "node build-tasks.js build-local && npm run pb:build-image && npm run pb:start-container",
 		"pb:build-image": "docker build --quiet -t runner-api-pocketbase ./pocketbase",
-		"pb:start-container": "docker run --rm -p 8090:8090 --env-file scripts/.env --name runner-api-pocketbase runner-api-pocketbase"
+		"pb:start-container": "docker run --rm -p 8090:8090 --env-file pocketbase/.env --name runner-api-pocketbase runner-api-pocketbase"
 	},
 	"dependencies": {
-		"dotenv": "^17.4.2",
 		"pocketbase": "^0.27.0"
 	},
 	"devDependencies": {
