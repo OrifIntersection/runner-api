@@ -4,32 +4,66 @@ onRecordDelete((e) => {
 		const name = e.record.get("name");
 		const webUrl = $os.getenv("RUNNER_URL");
 
-		$os.exec("sudo", "a2dissite", repo, `${repo}-le-ssl`).run();
-		$os
-			.exec(
-				"sudo",
-				"rm",
-				`/etc/apache2/sites-available/${repo}.conf`,
-				`/etc/apache2/sites-available/${repo}-le-ssl.conf`,
-			)
-			.run();
-		$os.exec("docker", "stop", `${name}-container`).run();
-		$os.exec("docker", "rm", `${name}-container`).run();
-		$os.exec("docker", "rmi", `${name}-image`).run();
-		$os
-			.exec(
-				"certbot",
-				"delete",
-				"--cert-name",
-				`${name}.${webUrl}`,
-				"--non-interactive",
-			)
-			.run();
-		$os.exec("apache2ctl", "restart").run();
+		try {
+			$os.exec("sudo", "a2dissite", repo, `${repo}-le-ssl`).run();
+		} catch {
+			console.warn(`${repo}-le-ssl could not be disabled`);
+		}
+
+		try {
+			$os.exec("sudo", "rm", `/etc/apache2/sites-available/${repo}.conf`).run();
+		} catch {
+			console.warn(`${repo} site config file could not be removed`);
+		}
+
+		try {
+			$os
+				.exec("sudo", "rm", `/etc/apache2/sites-available/${repo}-le-ssl.conf`)
+				.run();
+		} catch {
+			console.warn(`${repo} site config file could not be removed`);
+		}
+
+		try {
+			$os.exec("docker", "stop", `${name}-container`).run();
+		} catch {
+			console.warn(`${name}-container could not be stopped`);
+		}
+
+		try {
+			$os.exec("docker", "rm", `${name}-container`).run();
+		} catch {
+			console.warn(`${name}-container could not be removed`);
+		}
+
+		try {
+			$os.exec("docker", "rmi", `${name}-image`).run();
+		} catch {
+			console.warn(`${name}-image could not be removed`);
+		}
+
+		try {
+			$os
+				.exec(
+					"certbot",
+					"delete",
+					"--cert-name",
+					`${name}.${webUrl}`,
+					"--non-interactive",
+				)
+				.run();
+		} catch {
+			console.warn(`Certificate for ${name}.${webUrl} could not be deleted`);
+		}
+
+		try {
+			$os.exec("apache2ctl", "restart").run();
+		} catch {
+			console.warn("apache2ctl could not be restarted");
+		}
 	} else {
 		console.log("Host metadata cannot be deleted in a dev environment.");
 	}
-
 	e.next();
 }, "hosts");
 
